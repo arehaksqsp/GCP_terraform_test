@@ -1,0 +1,115 @@
+####### Creating a regional, internal TCP load balancer that works with Kubernetes   #######
+####### --------------------------------------------------------------------------   ####### 
+####### If I'm doing this right, it should create a regional load balancer across    ####### 
+####### a managed instance group. It then gets added to a target pool. After being   ####### 
+####### added, the load balancer has a regional forwarding rule created on it, to    ####### 
+####### forward traffic to healthy instances in that pool.                           ####### 
+#######                                                                              ####### 
+####### The script creates an internal load balancer, after which we provide the     ####### 
+####### reference to a managed instance group. That reference gets added to a        ####### 
+####### regional backend service. Finally, an internal forwarding rule gets made     ####### 
+####### to forward traffic to healthy instances within that managed instance         #######
+####### group.                                                                       ####### 
+#######                                                                              ####### 
+####### A lot of this is borrowed from a Google Cloud lab and from one of the Ter-   ####### 
+####### raform Google training modules available on Github. This one can be found    ####### 
+####### at: https://github.com/terraform-google-modules/terraform-google-lb.         #######   
+####### --------------------------------------------------------------------------   #######  
+####### What ought to be happening:                                                  ####### 
+#######                                                                              ####### 
+####### We're cloning the examples repo and then creating the load balancer with a   ####### 
+####### forwarding rule on it. After that, we create the TCP load balancer and       #######  
+####### after that, the regional forwarding rule. I found a GCS bucket that has      ####### 
+####### all this config info pre-loaded into it, so I'm just going to crib from      #######  
+####### what's in the lab, as code examples:                                         #######  
+#######                                                                              ####### 
+####### TO CREATE THE TCP LOAD BALANCER, FOR REGIONAL LOAD BALANCING ACROSS A MAN-   ####### 
+####### -AGED INSTANCE GROUP:                                                        #######
+#######                                                                              ####### 
+#######  module "gce-lb-fr" {                                                        #######  
+#######    source       = "github.com/GoogleCloudPlatform/terraform-google-lb"       #######  
+#######    region       = "${var.region}"                                            #######  
+#######    name         = "group1-lb"                                                #######  
+#######    service_port = "${module.mig1.service_port}"                              #######  
+#######    target_tags  = ["${module.mig1.target_tags}"]                             #######  
+#######  }                                                                           ####### 
+#######                                                                              ####### 
+####### TO CREATE THE REGIONAL INTERNAL FORWARDING RULE, TO ROUTE TRAFFIC TOWARDS    #######
+####### HEALTHY INSTANCES:                                                           ####### 
+#######                                                                              ####### 
+####### module "gce-ilb" {                                                           #######
+#######   source         = "github.com/GoogleCloudPlatform/terraform-google-lb-internal" ###
+#######   region         = "${var.region}"                                           #######
+#######   name           = "group2-ilb"                                              #######
+#######   ports          = ["${module.mig2.service_port}"]                           #######
+#######   health_port    = "${module.mig2.service_port}"                             #######
+#######   source_tags    = ["${module.mig1.target_tags}"]                            #######
+#######   target_tags    = ["${module.mig2.target_tags}","${module.mig3.target_tags}"] #####
+#######   backends       = [                                                         #######
+#######     { group = "${module.mig2.instance_group}" },                             #######
+#######     { group = "${module.mig3.instance_group}" },                             #######
+#######   ]                                                                          #######
+####### }                                                                            ####### 
+#######                                                                              ####### 
+####### TO CREATE THE LOAD BALANCER'S GLOBAL FORWARDING RULE:                        ####### 
+####### module "gce-lb-http" {                                                       ####### 
+#######   source            = "github.com/GoogleCloudPlatform/terraform-google-lb-http" ####
+#######   name              = "group-http-lb"                                        ####### 
+#######   target_tags       = ["${module.mig1.target_tags}", "${module.mig2.target_tags}"] #
+#######   backends          = {                                                      ####### 
+#######     "0" = [                                                                  ####### 
+#######       { group = "${module.mig1.instance_group}" },                           ####### 
+#######       { group = "${module.mig2.instance_group}" }                            ####### 
+#######     ],                                                                       ####### 
+#######   }                                                                          ####### 
+#######   backend_params    = [                                                      ####### 
+#######     # health check path, port name, port number, timeout seconds.            ####### 
+#######     "/,http,80,10"                                                           ####### 
+#######   ]                                                                          ####### 
+####### }                                                                            ####### 
+#######                                                                              ####### 
+####### The procedure is to clone the repo where the Cloud Shell labs exists, then   ####### 
+####### create the TCP load balancer and its regional forwarding rule, with these    ####### 
+####### commands:                                                                    ####### 
+#######                                                                              ####### 
+####### git clone https://github.com/GoogleCloudPlatform/terraform-google-lb         ####### 
+####### cd ~/terraform-google-lb/examples/basic                                      ####### 
+#######                                                                              ####### 
+####### Then, we export our Google project ID and export that using a sed, so that   ####### 
+####### GCP replaces any default regions with our assigned value in the variable     ####### 
+####### called REGION. (This was an issue during the labs, I assume it's something   ####### 
+####### we need to be aware of during a real deployment as well.)                    ####### 
+#######                                                                              ####### 
+####### With our Terraform exported and our region stated, we can now run a few of   ####### 
+####### the needed "terraform" commands. We start with "terraform init," to create   #######
+####### a working directory with the initial configuration files needed, to produce  #######
+####### the desired infrastructure state. That is followed with "terraform plan," to ####### 
+####### create an execution plan that Terraform will follow, when we tell it to make ####### 
+####### our infrastructure. We tell it to actually make the infra by following the   ####### 
+####### plan it previously made, using the "terraform apply" command.                ####### 
+#######                                                                              ####### 
+####### terraform init                                                               ####### 
+####### terraform plan                                                               ####### 
+####### terraform apply                                                              ####### 
+#######                                                                              ####### 
+####### For all three of the above commands, it is likely to ask for a value for the ####### 
+####### Project ID, so remember to look for it & enter it as you go.                 ####### 
+#######                                                                              ####### 
+####### You can check the status of your new load balancer in the Cloud Console by   ####### 
+####### going to the Navigation Menu, going to Networkiing -> View All Products ->   ####### 
+####### Network Services -> Load Balancing.                                          ####### 
+#######                                                                              ####### 
+####### To locate the URL of your new load balancer, run the following in Cloud      ####### 
+####### Shell:                                                                       ####### 
+#######                                                                              ####### 
+####### EXTERNAL_IP=$(terraform output | grep load_balancer_default_ip | \           ####### 
+####### cut -d = -f2 | xargs echo -n)                                                ####### 
+####### echo "http://${EXTERNAL_IP}"                                                 ####### 
+#######                                                                              ####### 
+####### Click on the output link for http://${EXTERNAL_IP} to open up a browser      ####### 
+####### page that takes you to the load balancer. Refresh that page a few times,     ####### 
+####### to observe the traffic being balanced across the region.                     ####### 
+#######                                                                              ####### 
+#######                                                                              ####### 
+#######                                                                              ####### 
+############################################################################################
