@@ -68,7 +68,7 @@
 #######   ]                                                                          ####### 
 ####### }                                                                            ####### 
 #######                                                                              ####### 
-####### The procedure is to clone the repo where the Cloud Shell labs exists, then   ####### 
+####### The procedure is to clone the repo where the Cloud Shell labs exist, then    ####### 
 ####### create the TCP load balancer and its regional forwarding rule, with these    ####### 
 ####### commands:                                                                    ####### 
 #######                                                                              ####### 
