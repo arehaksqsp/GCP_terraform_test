@@ -96,7 +96,7 @@
 ####### Project ID, so remember to look for it & enter it as you go.                 ####### 
 #######                                                                              ####### 
 ####### You can check the status of your new load balancer in the Cloud Console by   ####### 
-####### going to the Navigation Menu, going to Networkiing -> View All Products ->   ####### 
+####### going to the Navigation Menu, going to Networking -> View All Products ->    ####### 
 ####### Network Services -> Load Balancing.                                          ####### 
 #######                                                                              ####### 
 ####### To locate the URL of your new load balancer, run the following in Cloud      ####### 
