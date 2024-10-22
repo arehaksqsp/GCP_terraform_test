@@ -110,6 +110,17 @@
 ####### page that takes you to the load balancer. Refresh that page a few times,     ####### 
 ####### to observe the traffic being balanced across the region.                     ####### 
 #######                                                                              ####### 
+####### Commands to run after Cloud Shell is spun up:                                ####### 
+#######                                                                              ####### 
+####### export REGION=                                                               ####### 
+#######                                                                              ####### 
+####### curl -LO raw.githubusercontent.com/________________                          #######
+#######                                                                              ####### 
+####### sudo chmod +x <filename>.sh                                                  ####### 
+#######                                                                              ####### 
+####### ./<filename>.sh                                                              ####### 
+#######                                                                              ####### 
+#######                                                                              ####### 
 #######                                                                              ####### 
 #######                                                                              ####### 
 ############################################################################################
