@@ -114,7 +114,8 @@
 ####### --------------------------------------------------------------------------   ####### 
 ####### export REGION=                                                               ####### 
 #######                                                                              ####### 
-####### curl -LO raw.githubusercontent.com/________________                          #######
+####### curl -LO https://raw.githubusercontent.com/arehaksqsp/GCP_terraform_test/    #######
+####### refs/heads/main/regional-lb-with-tf                                          #######
 #######                                                                              ####### 
 ####### sudo chmod +x <filename>.sh                                                  ####### 
 #######                                                                              ####### 
