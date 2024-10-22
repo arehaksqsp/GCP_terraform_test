@@ -111,7 +111,7 @@
 ####### to observe the traffic being balanced across the region.                     ####### 
 #######                                                                              ####### 
 ####### Commands to run after Cloud Shell is spun up:                                ####### 
-#######                                                                              ####### 
+####### --------------------------------------------------------------------------   ####### 
 ####### export REGION=                                                               ####### 
 #######                                                                              ####### 
 ####### curl -LO raw.githubusercontent.com/________________                          #######
