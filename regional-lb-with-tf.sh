@@ -5,7 +5,7 @@ cd ~/terraform-google-lb/examples/basic
 
 export GOOGLE_PROJECT=$(gcloud config get-value project)
 
-sed -i `s/us-central1/'"$REGION"'/g' variables.tf 
+sed -i 's/us-central1/'"$REGION"'/g' variables.tf 
 
 export TF_VAR_project_id=$DEVSHELL_PROJECT_ID
 
