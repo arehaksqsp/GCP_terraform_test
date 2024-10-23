@@ -5,5 +5,5 @@ gsutil cp -r gs://spls/gsp234.zip .
 unzip gsp234.zip
 
 terraform init 
-terraform plam -out=tfplan 
+terraform plan -out=tfplan 
 terraform apply tfplan 
