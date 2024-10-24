@@ -1,0 +1,65 @@
+#######                        Cloud SQL with Terraform                              #######
+####### --------------------------------------------------------------------------   ####### 
+####### If I'm doing this right, it should create a CloudSQL instance using Terra-   ####### 
+####### form in GCP. After that, we should set up the Cloud SQL Proxy, then test     ####### 
+####### the connection with a MySQL client using Cloud Shell.                        ####### 
+#######                                                                              ####### 
+####### This one was much easier than some of the others, because I was able to      ####### 
+####### locate a pre-existing GCP bucket with a lot of the information needed to     ####### 
+####### spin this up. All I really needed to do at first was to create a direct-     ####### 
+####### ory for the SQL and Terraform files, then use gsutil commands to pull        #######
+####### those scripts into that directory, then unzip them.                          ####### 
+#######                                                                              ####### 
+####### The lab for this particular exercise recommends that you examine the main.tf ####### 
+####### file after pulling it down and unzipping it. You can do that at the command  ####### 
+####### prompt for the Cloud Shell instance by entering that directory and typing    #######
+####### cat main.tf. After that, we'll open up the variables.tf file and modify the  ####### 
+####### "project" and "region" variables, to reflect the Project ID and the region   ####### 
+####### we'll be using.                                                              ####### 
+#######                                                                              ####### 
+####### There is an optional "-out=" argument we'll be using; this is used to save   #######
+####### the generated plan for later execution, via "terraform apply."               #######
+####### --------------------------------------------------------------------------   #######  
+####### After we run "init" and "plan," we can apply "terraform apply" to apply the  ####### 
+####### changes we need, to each our desired state of configuration. When they       ####### 
+####### are applied, we can now work with the Cloud SQL Proxy we have generated.     ####### 
+####### Cloud SQL works by spinning up local proxy client, that communicates with    ####### 
+####### your database using your protocol of choice, without having to set up a      #######  
+####### whitelist of IP addresses or configure SSL. The proxy itself handles all     ####### 
+####### steps, building a secure tunnel to the database and "talking" to it.         #######  
+####### We can install the proxy files and make them executable with the following   #######  
+####### commands:                                                                    ####### 
+#######                                                                              ####### 
+####### wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O \         ####### 
+####### cloud_sql_proxy                                                              #######
+####### chmod +x cloud_sql_proxy                                                     ####### 
+#######                                                                              ####### 
+####### We test the connection to the database by doing the following:               ####### 
+#######   - Run the Cloud SQL proxy:                                                 ####### 
+#######          export GOOGLE_PROJECT=$(gcloud config get-value project)            #######
+#######          MYSQL_DB_NAME=$(terraform output -json | jq -r '.instance_name.value') ####
+#######          MYSQL_CONN_NAME="${GOOGLE_PROJECT}:REGION:${MYSQL_DB_NAME}"         #######
+#######   - Run this command:                                                        ####### 
+#######          ./cloud_sql_proxy -instances=${MYSQL_CONN_NAME}=tcp:3306            ####### 
+#######   - Open another Cloud Shell tab; you'll be using this one to connect to     ####### 
+#######     the Cloud SQL proxy.                                                     ####### 
+#######          cd ~/sql-with-terraform                                             ####### 
+#######   - Get the pre-generated password for MySQL:                                ####### 
+#######          echo MYSQL_PASSWORD=$(terraform output -json | jq -r '.             ####### 
+#######          generated_user_password.value')                                     #######
+#######   - Test your MySQL connection:                                              ####### 
+#######          mysql -udefault -p --host 127.0.0.1 default                         ####### 
+#######   - Enter the password when prompted; you should log into a MySQL command    ####### 
+#######     line. Exit that command line with Ctrl+D. When you switch back to the    ####### 
+#######     previous tab, you'll see a log for the connection you made to the Cloud  ####### 
+#######     SQL Proxy.                                                               ####### 
+#######  --------------------------------------------------------------------------  ####### 
+#######  Commands you'll run from Cloud Shell:                                       ####### 
+#######                                                                              ####### 
+####### curl -LO raw.githubusercontent.com____________________________               ####### 
+#######                                                                              ####### 
+####### sudo chmod +x ________.sh                                                    ####### 
+####### ./________.sh                                                                ####### 
+#######                                                                              ####### 
+#######                                                                              ####### 
+############################################################################################
